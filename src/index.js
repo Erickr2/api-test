@@ -9,8 +9,7 @@ const port = 3000;
  *  "src/db/fakeUsers.db.js
  */
 
-// GET ALL
-//Mostrar todos los usuarios
+
 app.get("/users", (req, res) => {
   res.send("Hello Word, this is my first API REST with Node and Express js");
 });
