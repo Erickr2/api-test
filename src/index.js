@@ -1,6 +1,8 @@
 const express = require("express");
-const app = express();
-const port = 3000;
+const app = express.Router();
+const port = 3000; 
+
+const mysqlConnection = require('../src/db/fakeUsers.db')
 
 /*
  * Enpoints para trabajar fake crud mediante protocolo HTTP
@@ -9,33 +11,71 @@ const port = 3000;
  *  "src/db/fakeUsers.db.js
  */
 
-
-app.get("/users", (req, res) => {
-  res.send("Hello Word, this is my first API REST with Node and Express js");
+// GET ALL
+//Mostrar todos los usuarios
+app.get("/", (req, res) => {
+  mysqlConnection.query('SELECT * FROM users', (err, rows, fields) => {
+    if(!err){
+      res.json(rows)
+    }else{
+      console.log(err)
+    }
+  })
 });
 
 // GET ALL USERS BY LANGUAJE
 // Se debe recibir por parametro el lenguaje que sera la busqueda para filtrar de nuestra bd
-app.get("/users-by-languaje", (req, res) => {
-  res.send("Hello Word, this is my first API REST with Node and Express js");
+app.get("/:languaje", (req, res) => {
+  if(!err){
+    res.send({lenguaje: `${req.params.lenguaje}`})
+  }else{
+    console.log(err)
+  }
 });
 
 // UPDATE USERS
 // Se debe enviar el id del usuario que se quiere actualizar y la información para actualizar la bd
-app.put("/update-user", (req, res) => {
-  res.send("Hello Word, this is my first API REST with Node and Express js");
+app.put('/:id', (req, res) => {
+  const {id, name, skills} = req.body;
+  mysqlConnection.query(query, [id, name, skills], (err, rows, fields) => {
+      if(!err) {
+          res.json({status: 'usuario agregado correctamente'});
+      } else {
+          console.log(err);
+      }
+  });
 });
+
 
 // CREATE USER
 // Se debe enviar la información para dar el alta a un nuevo usuario dentro de la bd
-app.post("/create-user", (req, res) => {
-  res.send("Hello Word, this is my first API REST with Node and Express js");
+app.post('/', (req, res ) => {
+  const {id, name, skills} = req.body;
+
+  const query = `
+  
+  CALL users(?, ?, ?, ?, ?);
+  `;
+  mysqlConnection.query(query, [id, name, skills], (err, rows, fields) => {
+      if(!err){
+          res.json({status: 'usuario guardado'});
+      } else {
+          console.log(err);
+      }
+  });
 });
 
 // DELETE USER
 // Se debe enviar la información para eliminar un usuario dentro de la bd por nombre o id
-app.delete("/create-user", (req, res) => {
-  res.send("Hello Word, this is my first API REST with Node and Express js");
+app.delete("/:id", (req, res) => {
+  const {id} = req.params;
+  mysqlConnection.query('DELETE FROM users WHERE id = ?', [id], (err, rows, fields) => {
+    if(!err){
+      res.json({status: 'usuario eliminado'})
+    }else{
+      console.log(err)
+    }
+  })
 });
 
 /*
@@ -53,5 +93,5 @@ app.delete("/create-user", (req, res) => {
  */
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`puerto corriendo en: ${port}`);
 });
